@@ -9,7 +9,7 @@ from django.db.models import Sum
 
 
 # Create your views here.
-@api_view()
+@api_view(['GET', 'POST'])
 def Note_View(request):
     queryset = Note.objects.all()
     serializer = Note_Serializer(queryset, many=True)
@@ -95,11 +95,13 @@ class Transaction_View_Class(APIView):
             { "message": "data deleted", "data": {} }
         )
 
+
+
 # Class for performing CURD operation in the Note model 
 class Note_View_Class(APIView):
     
     # Put operation function [C->Create]
-    def Post(self, request):
+    def post(self, request):
         data = request.data
         serializer = Note_Serializer(data, many=True)
         if not serializer.is_valid(): 
@@ -110,12 +112,46 @@ class Note_View_Class(APIView):
         return Response(  
             {  "data" : serializer.data  }
         )
-        
+
+    
     # Get Operation fucntion [R-> READ]
-    def Get(APIView):
+    def get(self, request):
         queryset = Note.objects.all().order_by("-pk")
         serializer = Note_Serializer(queryset, many=True)
         return Response(
             {"data" : serializer.data}
         )
+    
+    
+    # Patch Operation (U -> Update)
+    def patch(self, request):
+        data = request.data
+        if not data.get("-id"):
+            return Response(
+                { "message": "Data Updation Failed!" , "error" : "Data ID is needed." }
+            )
+        note = Note.objects.get(id = data.get("id") )
+        serializer = Note_Serializer(note, data=data, partial = True)
+        if not serializer.is_valid():
+            return Response(
+                { "message": "data not save", "error": serializer.error }
+            )
+        serializer.save()
+        return Response(
+            { "data" : serializer.data }
+        )
+    
+    
+    # DELETE method
+    def delete(self, request):
+        data = request.data
+        if not data.get('id'):    # if not ID return error
+            return Response(
+                {"message": "Data updation failed!", "error": "data ID is required" }
+            )
         
+        # get specific transaction data that need to be updated , with help of  id 
+        note = Note.objects.get(id = data.get('id') ).delete()
+        return Response(
+            { "message": "data deleted", "data": {} }
+        )
