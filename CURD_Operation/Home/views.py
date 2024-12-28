@@ -41,7 +41,7 @@ class Transaction_View_Class(APIView):
         )
     
     # POST method
-    def post(self, request):
+    def post(self, request):  # sourcery skip: class-extract-method
         data = request.data #taking data from user
         serializer = Transaction_Serializer(data = data) #Serialize the data taken from user 
         if not serializer.is_valid(): # Check if the data entered by user is valid or not and if not return error , 
